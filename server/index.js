@@ -19,7 +19,12 @@ const users = [
     }
 ]
 
-
+const generateAccessToken = (user) => {
+    return jwt.sign({ id: user.id, isAdmin: user.isAdmin }, "secretKey", { expiresIn: "5s" })
+}
+const generateRefreshToken = (user) => {
+    const refreshToken = jwt.sign({ id: user.id, isAdmin: user.isAdmin }, "refreshSecretKey",)
+}
 
 //login route
 
@@ -31,8 +36,8 @@ app.post("/api/login", (req, res) => {
     })
     if (user) {
         //generiram acsessToken
-        const accessToken = jwt.sign({ id: user.id, isAdmin: user.isAdmin }, "secretKey", { expiresIn: "20s" }) //sending payload expiresIn predstavlja kada korisnik dobije token on se menja za 15s zbog bolje zastitenosti
-        const refreshToken = jwt.sign({ id: user.id, isAdmin: user.isAdmin }, "refreshSecretKey",)
+        const accessToken = generateAccessToken(user)  //sending payload expiresIn predstavlja kada korisnik dobije token on se menja za 15s zbog bolje zastitenosti
+        const refreshToken = generateRefreshToken(user);
         refreshTokens.push(refreshToken);
         res.json({
             username: user.username,
@@ -63,8 +68,8 @@ app.post("/api/refresh", (req, res) => {
         err && console.log(err);
         refreshTokens = refreshTokens.filter(token => token !== refreshToken)
 
-        const newAccessToken = jwt.sign({ id: user.id, isAdmin: user.isAdmin }, "secretKey", { expiresIn: "10m" })
-        const newRefreshToken = jwt.sign({ id: user.id, isAdmin: user.isAdmin }, "refreshSecretKey", { expiresIn: "10m" })
+        const newAccessToken = generateAccessToken(user);
+        const newRefreshToken = generateAccessToken(user);
 
         refreshTokens.push(newRefreshToken);
 
